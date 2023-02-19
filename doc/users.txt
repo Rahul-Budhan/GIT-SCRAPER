@@ -1,9 +1,8 @@
-#Top 10 active members of github
+# Random people on github
 visionmedia
 c9s
 fabpot
-weierophinney
-springmeyer 
+rahul-budhan
 dcramer
 jeromeetienne 
 ornicar 

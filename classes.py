@@ -2,44 +2,68 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
-def read(read_file_location):
+"""Function to take input from the users.txt file"""
+def get_users(read_file_location):
     handle = open(read_file_location,'r')
-    total_users = 0
-    for line in handle:
-        if line[0] =='#':
-            continue
-        total_users+=1
-    UserNames = [str]*total_users
+    data = handle.read()
+    lines = data.split('\n')
+    for line in lines:
+        if line[0] == '#' or line[0] == ' ':
+            lines.remove(line) 
     handle.close()
-    print(UserNames)
-    return UserNames
+    return lines
 
-def fetch_details(user):
+"""Function to fetch data from github and convert data into details"""
+def fetch_details(user,output_location):
     """Input and Initializing done here"""
     url = 'https://github.com/'+user
     contributions = " "
     r = requests.get(url)
     soup = bs(r.content, 'html.parser')
-    """data into local variables"""
-    profile_image = soup.find('img',{'alt':'Avatar'})['src']
-    total_repos = soup.find('span',{'class':'Counter','data-view-component':'true'})['title']
-    contributions_in_last_year = (soup.find('h2',{'class':"f4 text-normal mb-2"})).text
+    total_repos=""
+    """data into local variables within try except to handle exceptions and enter data accordingly """
+    try:
+        try:
+            profile_image = soup.find('img',{"alt":"Avatar"})['src']
+        except:
+            profile_image = soup.find('img',{"itemprop":"image"})['src']  
+    except:
+        profile_image = "Not Found"
+    try:
+        name = soup.find('span',{"class":"p-name vcard-fullname d-block overflow-hidden"}).text
+    except:
+        name = " "
+    total_repos=""
+    try:
+        repo_str = soup.find('a',{"data-tab-item":"repositories"}).text
+        x=repo_str.split()
+        for i in x:
+            total_repos = i +' '+ total_repos
+    except:
+        repo_str = soup.find('span',{"class":"Counter js-profile-repository-count"})
+    try:
+        contributions_in_last_year = (soup.find('h2',{'class':"f4 text-normal mb-2"})).text
+        """Data manipulitation done to ease the output"""
+        contributionsList =(contributions_in_last_year).split()
+        contributions = (contributions).join(contributionsList)
+        cont = True
+    except:
+        cont = False
+    write_into_file(output_location,[name,user,url,profile_image,total_repos,contributions],cont,False)
 
+"""Function to write data into output file"""
+def write_into_file(write_file_location,details,cont,done):
+    if done:
+        with open(write_file_location,'a') as file:
+            file.write(details)
+            return
 
-    """Data manipulitation done to ease the output"""
-    contributionsList =(contributions_in_last_year).split()
-    contributions = (contributions).join(contributionsList)
-
-    return {'profile_image':profile_image,'total_repos':total_repos,'contributions':contributions}
-
-
-def write(write_file_location, details):
-    handle = open(write_file_location)
-
-
-    print("Profile :",url, end=" \n")
-    print("Image Url"," :",profile_image, end=" \n")
-    print(total_repos,end=" \n")
-    print(contributions)
+    if not cont:
+        details.pop()
+    with open(write_file_location,'a') as file:
+        for line in details:
+            file.write(line)
+            file.write("\n")
+        file.write("\n")
 
     
