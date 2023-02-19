@@ -7,7 +7,12 @@ Before running the program, you'll need to install the required libraries. You c
 ```bash
   pip install requests
   pip install beautifulsoup4
+  
+  To run program
+  python main.py
 ```
+
+
 
 ### Usage
 To use the program, simply run the main.py file in your Python environment. The program will prompt you for the URL of the website you want to scrape and the name of the file you want to save the data to.
